@@ -59,6 +59,14 @@ class Person extends Model {
       { expiresIn: process.env.ACCESS_TOKEN_EXPIRY }
     );
   }
+  //generate refresh token
+  generateRefreshToken() {
+    return jwt.sign(
+      { id: this.id, role: this.role, email: this.email },
+      process.env.REFRESH_TOKEN_SECRET,
+      { expiresIn: process.env.REFRESH_TOKEN_EXPIRY }
+    );
+  }
 }
 
 export { Person };
