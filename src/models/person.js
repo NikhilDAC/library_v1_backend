@@ -39,10 +39,10 @@ class Person extends Model {
   }
 
   // add method to hash password
-  async $afterInsert() {
+  async $beforeInsert() {
+    this.created_at = new Date();
+    this.updated_at = new Date();
     if (this.password) {
-      this.created_at = new Date();
-      this.updated_at = new Date();
       this.password = await becrypt.hash(this.password, 10);
     }
   }

@@ -1,11 +1,12 @@
 import { Person } from "../models/person.js";
 import { ApiError } from "../utils/APIError.js";
 import { ApiResponse } from "../utils/APIResponse.js";
+import { uploadToCloudinery } from "../utils/cloudinery.js";
 // register admin
 
 const registerAdmin = async function register(req, res) {
-    console.log(`[info]: inside register function`);
-    
+  console.log(`[info]: inside register function`);
+
   try {
     const {
       user_name,
@@ -38,24 +39,44 @@ const registerAdmin = async function register(req, res) {
       throw new ApiError(403, "Same user found with same email id");
     }
 
+    // validate the images
+    console.log("File:", req.file);
+    // extract the local path
+
+    // // }
+    const locaPath = req.file?.path;
+    const cloudinaryResponse = "";
+    if (locaPath !== undefined) {
+      cloudinaryResponse = await uploadToCloudinery(locaPath);
+      console.log(cloudinaryResponse.url);
+    }
+
     // fire an insert query
     const response = await Person.query()
       .insert({
         user_name: user_name,
         full_name: full_name,
         email: email,
-        password: password,
-        role:"ADMIN",
+        password: req.body.password,
+        role: "ADMIN",
         phone_number: phone_number,
+        profile_image: cloudinaryResponse ? cloudinaryResponse.url : "",
         account_status: account_status,
       })
-      .returning("id", "user_name", "email", "phone_number");
+      .select("id", "user_name", "full_name", "password", "phone_number");
     if (!response) {
       throw new ApiError(403, `Can't insert the record:`);
     }
     return res
       .status(200)
-      .json(new ApiResponse(200, "Registraction successfull", response));
+      .json(
+        new ApiResponse(200, "Registraction successfull", {
+          id: response.id,
+          user_name: response.user_name,
+          full_name: response.full_name,
+          email: response.email,
+        })
+      );
   } catch (error) {
     throw new ApiError(
       500,
@@ -64,4 +85,4 @@ const registerAdmin = async function register(req, res) {
   }
 };
 
-export{registerAdmin};
+export { registerAdmin };
