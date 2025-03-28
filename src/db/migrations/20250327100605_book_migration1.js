@@ -18,6 +18,7 @@ export function up(knex) {
       .references("id")
       .inTable("persons")
       .onDelete("CASCADE");
+    table.timestamps(true,true);
   });
 }
 

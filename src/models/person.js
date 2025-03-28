@@ -2,6 +2,7 @@ import { Model } from "objection";
 import becrypt from "bcrypt";
 import { Book } from "./book.js";
 import { BookRecords } from "./book_records.js";
+import { Address } from "./address.js";
 import jwt from "jsonwebtoken";
 class Person extends Model {
   static get tableName() {
@@ -24,6 +25,14 @@ class Person extends Model {
         join: {
           from: "persons.id",
           to: "bookRecords.person_id",
+        },
+      },
+      address: {
+        relation: Model.HasOneRelation,
+        modelClass: Address,
+        join: {
+          from: "persons.id",
+          to: "addresses.person_id",
         },
       },
     };

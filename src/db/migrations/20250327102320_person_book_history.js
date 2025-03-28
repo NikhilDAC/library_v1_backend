@@ -18,6 +18,7 @@ export function up(knex) {
     table.date("expire_date").notNullable();
     table.decimal("book_fine", 8, 2).defaultTo(0.0);
     table.integer("number_of_issu_books").defaultTo(0).checkBetween([0, 4]);
+    table.timestamps(true,true);
   });
 }
 /**

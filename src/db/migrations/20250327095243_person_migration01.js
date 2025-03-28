@@ -13,6 +13,7 @@ export function up(knex) {
     table.string("phone_number").notNullable();
     table.boolean("account_status");
     table.string("refresh_token").defaultTo("");
+    table.timestamps(true,true);
   });
 }
 
