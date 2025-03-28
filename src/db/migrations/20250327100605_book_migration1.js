@@ -9,7 +9,9 @@ export function up(knex) {
     table.increments("id").primary();
     table.string("book_name", 100).notNullable().defaultTo("");
     table.string("book_author", 100).notNullable().defaultTo("");
+    table.string("category", 100).notNullable().defaultTo("");
     table.decimal("book_price", 6, 2).notNullable().defaultTo(0.0);
+    table.string("cover_image").defaultTo("");
     table.integer("quantity").notNullable().defaultTo(0);
     table
       .integer("person_id")
@@ -18,7 +20,7 @@ export function up(knex) {
       .references("id")
       .inTable("persons")
       .onDelete("CASCADE");
-    table.timestamps(true,true);
+    table.timestamps(true, true);
   });
 }
 
@@ -26,6 +28,6 @@ export function up(knex) {
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-export function down(knex){
-    return knex.schema.dropTableIfExists("books")
+export function down(knex) {
+  return knex.schema.dropTableIfExists("books");
 }

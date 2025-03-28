@@ -11,9 +11,10 @@ export function up(knex) {
     table.string("password").notNullable();
     table.enu("role", ["ADMIN", "USER"]);
     table.string("phone_number").notNullable();
+    table.string("profile_image").defaultTo("");
     table.boolean("account_status");
     table.string("refresh_token").defaultTo("");
-    table.timestamps(true,true);
+    table.timestamps(true, true);
   });
 }
 
