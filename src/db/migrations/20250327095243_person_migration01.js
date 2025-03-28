@@ -9,7 +9,7 @@ export function up(knex) {
     table.string("full_name", 50).notNullable().defaultTo("");
     table.string("email").unique().notNullable();
     table.string("password").notNullable();
-    table.enu("role", ["ADMIN", "USER"]).notNullable();
+    table.enu("role", ["ADMIN", "USER"]);
     table.string("phone_number").notNullable();
     table.boolean("account_status");
     table.string("refresh_token").defaultTo("");
