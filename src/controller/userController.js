@@ -49,6 +49,22 @@ const userRegister = async function register(req, res) {
       console.log(cloudinaryResponse.url);
     }
 
+    // if request is coming throw admin then show the role at frontend
+
+    const adminData = await Person.query().findById(req.admin.id);
+    const assignRole = "";
+    const isAdminRequest = false;
+    if (adminData) {
+      isAdminRequest = true;
+      if (!req.body.role && req.body.role === "USER") {
+        throw new ApiError(
+          403,
+          "Role field can't be empty.Plese provide the role"
+        );
+      }
+      assignRole = req.body.role;
+    }
+
     // fire an insert query
     const response = await Person.query()
       .insert({
@@ -56,7 +72,7 @@ const userRegister = async function register(req, res) {
         full_name: full_name,
         email: email,
         password: req.body.password,
-        role: "USER",
+        role: isAdminRequest ? assignRole : "USER",
         phone_number: phone_number,
         profile_image: cloudinaryResponse ? cloudinaryResponse.url : "",
         account_status: account_status,
@@ -81,5 +97,4 @@ const userRegister = async function register(req, res) {
   }
 };
 
-
-export{userRegister}
+export { userRegister };
