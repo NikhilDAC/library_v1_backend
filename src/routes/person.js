@@ -1,10 +1,17 @@
 import { Router } from "express";
 import { registerAdmin } from "../controller/adminController.js";
-import { login } from "../controller/userController.js";
+import { login, logout } from "../controller/userController.js";
+import { verifyToken } from "../middleware/authentication.js";
+import { userRegister } from "../controller/userController.js";
 
-const personRoutes=Router();
+const personRoutes = Router();
 
-personRoutes.route("/register").post(registerAdmin);
-personRoutes.route("/login").post(login)
+personRoutes.route("admin/register").post(registerAdmin);
+personRoutes.route("admin/login").post(login);
+personRoutes.route("admin/logout").post(verifyToken, logout);
 
-export{personRoutes};
+// personRoutes.route("/user/register").post(userRegister);
+// personRoutes.route("/login").post(login);
+// personRoutes.route("/logout").post(verifyToken, logout);
+
+export { personRoutes };

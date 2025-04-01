@@ -7,27 +7,15 @@ const userRegister = async function register(req, res) {
   console.log(`[info]: inside register function`);
 
   try {
-    const {
-      user_name,
-      full_name,
-      email,
-      password,
-      phone_number,
-      account_status,
-    } = req.body;
+    const { user_name, full_name, email, password, phone_number } = req.body;
     console.log(
-      `RequestData: ${user_name} ${full_name} ${email} ${password} ${phone_number} ${account_status}`
+      `RequestData: ${user_name} ${full_name} ${email} ${password} ${phone_number}`
     );
 
     if (
-      [
-        user_name,
-        full_name,
-        email,
-        password,
-        phone_number,
-        account_status,
-      ].some((field) => field.trim() === "")
+      [user_name, full_name, email, password, phone_number].some(
+        (field) => field.trim() === ""
+      )
     ) {
       throw new ApiError(403, "Wrong inputs for register");
     }
@@ -38,45 +26,46 @@ const userRegister = async function register(req, res) {
       throw new ApiError(403, "Same user found with same email id");
     }
 
-    // validate the images
-    console.log("File:", req.file);
-    // extract the local path
+    // // validate the images
+    // console.log("File:", req.file);
+    // // extract the local path
 
-    // // }
-    const locaPath = req.file?.path;
-    const cloudinaryResponse = "";
-    if (locaPath !== undefined) {
-      cloudinaryResponse = await uploadToCloudinery(locaPath);
-      console.log(cloudinaryResponse.url);
-    }
+    // // // }
+    // const locaPath = req.file?.path;
+    // const cloudinaryResponse = "";
+    // if (locaPath !== undefined) {
+    //   cloudinaryResponse = await uploadToCloudinery(locaPath);
+    //   console.log(cloudinaryResponse.url);
+    // }
 
     // if request is coming throw admin then show the role at frontend
 
-    const adminData = await Person.query().findById(req.admin.id);
-    const assignRole = "";
-    const isAdminRequest = false;
-    if (adminData) {
-      isAdminRequest = true;
-      if (!req.body.role && req.body.role === "USER") {
-        throw new ApiError(
-          403,
-          "Role field can't be empty.Plese provide the role"
-        );
-      }
-      assignRole = req.body.role;
-    }
+    // const adminData = await Person.query().findById(req.admin.id);
+    // const assignRole = "";
+    // const isAdminRequest = false;
+    // if (adminData) {
+    //   isAdminRequest = true;
+    //   if (!req.body.role && req.body.role === "USER") {
+    //     throw new ApiError(
+    //       403,
+    //       "Role field can't be empty.Plese provide the role"
+    //     );
+    //   }
+    //   assignRole = req.body.role;
+    // }
 
     // fire an insert query
     const response = await Person.query()
       .insert({
         user_name: user_name,
-        full_name: full_name,
+        full_name: full_name.toLowerCase(),
         email: email,
         password: req.body.password,
-        role: isAdminRequest ? assignRole : "USER",
+        role: "USER",
         phone_number: phone_number,
-        profile_image: cloudinaryResponse ? cloudinaryResponse.url : "",
-        account_status: account_status,
+        // profile_image: cloudinaryResponse ? cloudinaryResponse.url : "",
+        account_status: true,
+        refresh_token: "",
       })
       .select("id", "user_name", "full_name", "password", "phone_number");
     if (!response) {
@@ -129,7 +118,7 @@ const login = async function loginPerson(req, res) {
 
   const body = {
     id: validatePerson.id,
-    user_name: validatePerson.user_nameemail,
+    user_name: validatePerson.user_name,
     email: validatePerson.email,
     refresh_token: validatePerson.refresh_token,
   };
@@ -145,8 +134,22 @@ const login = async function loginPerson(req, res) {
       })
     );
 };
-const logout= async function logoutPerson(req,res) {
-  
-}
+const logout = async function logoutPerson(req, res) {
+  // only login user can logout. This task is handle by the middleware
+  // clear the cookies from the request and db also
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+  const response = await Person.query()
+    .findById(req.user?.id)
+    .patch({ refresh_token: "" })
+    .debug();
+  return res
+    .status(200)
+    .clearCookie("accessToken", options)
+    .clearCookie("refreshToken", options)
+    .json(new ApiResponse(402, "User logout successfully..", {}));
+};
 
-export { userRegister, login };
+export { userRegister, login, logout };
