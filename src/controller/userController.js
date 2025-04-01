@@ -1,6 +1,7 @@
 import { Person } from "../models/person.js";
 import { ApiError } from "../utils/APIError.js";
 import { ApiResponse } from "../utils/APIResponse.js";
+import { generateTokens } from "../utils/generateTokes.js";
 
 const userRegister = async function register(req, res) {
   console.log(`[info]: inside register function`);
@@ -96,5 +97,56 @@ const userRegister = async function register(req, res) {
     );
   }
 };
+const login = async function loginPerson(req, res) {
+  // check user name and password
+  // check user exits or not
+  // create tokens and save refresh token inside database
+  const { email, password } = req.body;
+  console.log(`${email},${password}`);
+  if (!email && !password) {
+    throw new ApiError(403, "Invalid email or password");
+  }
 
-export { userRegister };
+  const validatePerson = await Person.query().findOne({ email: email }).debug();
+  if (!validatePerson) {
+    throw new ApiError(403, "User not found with same email..");
+  }
+  const isPasswordValid = validatePerson.validatePassword(
+    password,
+    validatePerson.password
+  );
+  if (!isPasswordValid) {
+    throw new ApiError(403, "Password is not matching with old password");
+  }
+  const tokens = await generateTokens(validatePerson.id);
+  const newAccessToken = tokens.adminAccessToken;
+  const newRefreshToken = tokens.adminRefreshToken;
+  // send token to user in the cookie
+  const options = {
+    httpOnly: true,
+    secure: true,
+  };
+
+  const body = {
+    id: validatePerson.id,
+    user_name: validatePerson.user_nameemail,
+    email: validatePerson.email,
+    refresh_token: validatePerson.refresh_token,
+  };
+  return res
+    .status(200)
+    .cookie("accessToken", tokens.adminAccessToken, options)
+    .cookie("refreshToken", tokens.adminRefreshToken, options)
+    .json(
+      new ApiResponse(203, "Login successfull", {
+        user: body,
+        newAccessToken,
+        newRefreshToken,
+      })
+    );
+};
+const logout= async function logoutPerson(req,res) {
+  
+}
+
+export { userRegister, login };
